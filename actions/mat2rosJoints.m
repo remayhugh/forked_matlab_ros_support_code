@@ -1,8 +1,9 @@
 function ros_cur_q = mat2rosJoints(mat_cur_q)
 %--------------------------------------------------------------------------
 % mat2rosJoints
-% Set ros joint angle positions from matlab positions. Inverse of
+% Set ros joint angle positions from matlab positions [pan, tilt, elbow, w1, w2, w3]. Inverse of
 % ros2matlabJoints. Hard-coded here. Need to update to be robust.
+% TODO: do I need to include the knuckle here?
 %
 % Input
 % mat_cur_q [1,6]: the six joint angles of the UR5e excluding fingers

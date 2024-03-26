@@ -41,13 +41,13 @@ function gripGoal=packGripGoal(pos,gripGoal)
     %3. Create a trajectory_msgs/JointTrajectoryPoint. Copy TimeFromSTart
     % and Positions in here along with vel/acc/effort. Finally copy this
     % variable into grip.Goal.Trajectory.Points
-    trajPts = rosmessage('trajectory_msgs/JointTrajectoryPoint');
+    trajPts = rosmessage('trajectory_msgs/JointTrajectoryPoint','DataFormat', 'struct');
     
     % Time Stamp
     if numJoints == 1
-        trajPts.TimeFromStart   = rosduration(1);
+        trajPts.TimeFromStart   = rosduration(1, 'DataFormat','struct');
     else
-        trajPts.TimeFromStart   = rosduration(jointWaypointTimes);
+        trajPts.TimeFromStart   = rosduration(jointWaypointTimes,'DataFormat', 'struct');
     end
     
     % Position
