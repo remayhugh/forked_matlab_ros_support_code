@@ -6,14 +6,13 @@
 
 %% Inputs
 
-% masterhostIP = withheld for security;
-% port = withheld for security;
-% machineIP = withheld for security;
+masterhostIP = 'add your own machine IP'
 
 
 %% Preliminaries
 
-rosinit(masterhostIP,port,'NodeHost',vmIP)
+rosshurtdown;
+rosinit(masterhostIP)
 % quick comment here: when you run this code, you will need to put in your
 % own port, IP, and vm IP that is running your gazebo.
 
