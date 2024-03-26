@@ -6,7 +6,7 @@
 
 %% Inputs
 
-masterhostIP = 'add your own machine IP';
+masterhostIP = 'your machine IP here';
 
 
 %% Preliminaries
@@ -19,7 +19,7 @@ rosinit(masterhostIP)
 
 %% Outputs
 
-Controlling the Robot Arm Pose using the ROS Action Client
+%Controlling the Robot Arm Pose using the ROS Action Client
 trajAct = rosactionclient('/pos_joint_traj_controller/follow_joint_trajectory','control_msgs/FollowJointTrajectory');
 trajGoal = rosmessage(trajAct);
 trajAct.FeedbackFcn = []; 
@@ -51,11 +51,11 @@ initialIKGuess(5) = jointStateMsg.Position(6);
 initialIKGuess(6) = jointStateMsg.Position(7);
 show(UR5e,initialIKGuess)
 
-gripper1 = -0.54;
-gripper2 = 0.15;
-gripper3 = 0.22;
+gripperX = 0.8;
+gripperY = -0.032295;
+gripperZ = ik_init(3,4);
 
-gripperTranslation = [gripper1 gripper2 gripper3];
+gripperTranslation = [gripperY gripperX gripperZ];
 gripperRotation = [-pi/2 -pi 0]; %  [Z Y Z] radians
 tform = eul2tform(gripperRotation); % ie eul2tr call
 tform(1:3,4) = gripperTranslation'; % set translation in homogeneous transform
