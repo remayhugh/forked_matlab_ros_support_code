@@ -1,4 +1,4 @@
-function [mat_joint_traj,robot_joint_names] = convertPoseTraj2JointTraj(robot,mat_traj)
+function [mat_joint_traj,robot_joint_names] = convertPoseTraj2JointTraj(robot,mat_traj,toolFlag)
     %-------------------------------------------------------------
     % convertPoseTraj2JointTraj
     % Compute IKs for Cartesian trajectory. Will need to:
@@ -19,7 +19,7 @@ function [mat_joint_traj,robot_joint_names] = convertPoseTraj2JointTraj(robot,ma
     
     %1. Size in terms 4x4xn
     traj_sz = size(mat_traj);
-    if length(traj_sz) == 2
+    if length(traj_sz) == 2 % If just 4x4 but not 4x4xn
         num_traj_points = 1;
     else
         num_traj_points = traj_sz(1,3);
@@ -30,7 +30,7 @@ function [mat_joint_traj,robot_joint_names] = convertPoseTraj2JointTraj(robot,ma
    
     % 3. Adjust the forward kinematics to match the URDF model in Gazebo:
     name = 'UR5e';
-    robot = urdfAdjustment(robot,name);    
+    robot = urdfAdjustment(robot,name,toolFlag);    
     
     % 4. Create the numerical IK Solver
     ik = inverseKinematics("RigidBodyTree",robot);
@@ -39,12 +39,15 @@ function [mat_joint_traj,robot_joint_names] = convertPoseTraj2JointTraj(robot,ma
     ikWeights = [0.25 0.25 0.25 0.1 0.1 .1];
     
     % Set initial guess to current position
-    joint_state_sub = rossubscriber("/joint_states");
+    joint_state_sub = rossubscriber("/joint_states", 'DataFormat','struct');
     ros_cur_jnt_state_msg = receive(joint_state_sub,1);
    
     % Reorder from ROS format to Matlab format, need names.
     [mat_cur_q,robot_joint_names] = ros2matlabJoints(ros_cur_jnt_state_msg);
-        
+    if max( abs(mat_cur_q) ) > 2*pi 
+        disp('Subscribed joints > pi. Not possible. Consider restarting gazebo...')
+    end
+
     % 5. Go through trajectory loop
     % Check for time complexity. Can we improve efficiency.
     for i = 1:num_traj_points

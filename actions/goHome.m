@@ -52,6 +52,12 @@ function [resultMsg,state,status] = goHome(config)
         disp('Connected to action server. Sending goal...')
         [resultMsg,state,status] = sendGoalAndWait(pick_traj_act_client,traj_goal);
     else
-        resultMsg = -1; state = 'failed'; status = 'could not find server';
+        disp('First try failed... Trying again...');
+        [resultMsg,state,status] = sendGoalAndWait(pick_traj_act_client,traj_goal);
     end
+
+    % Open Fingers
+    disp('Opening fingers...')
+    doGrip('place');
+
 end

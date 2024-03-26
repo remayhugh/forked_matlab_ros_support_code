@@ -34,14 +34,12 @@ function [mat_R_T_G, mat_R_T_M] = get_robot_object_pose_wrt_base_link(model_name
     mat_R_T_M(3,4) = mat_R_T_M(3,4) + canHeight; % Offset along +z to simulate knowing height of top of can.
 
     %% 3. Modify orientation of robot pose to be  a top-down pick (see rviz gripper_tip_link vs base_link)
-    mat_R_T_M(1:3,1:3) = rpy2r(0, pi/2, -pi);
+    % mat_R_T_M(1:3,1:3) = rpy2r(0, pi/2, -pi);
     
     %  From orgnizers
-    % T=eul2tform([pi/2 -pi 0]);
-    % mat_R_T_M(1:3,1:3) = T(1:3,1:3);
-    
-    
-    
+    T=eul2tform([-pi/2 -pi 0]);
+    mat_R_T_M(1:3,1:3) = T(1:3,1:3);
+            
     %% 4. Current Robot Pose in Cartesian Format:
     tftree = rostf('DataFormat','struct');     
     
@@ -61,6 +59,7 @@ function [mat_R_T_G, mat_R_T_M] = get_robot_object_pose_wrt_base_link(model_name
     
     %% Hacks: set x-axis to y-axis and y-axis to x-axis and use tool0 but
     % lift goal by difference.
-    %mat_R_T_M(1:2,4) = mat_R_T_M(2:-1:1,4);
-    mat_R_T_M(3,4) = mat_R_T_M(3,4) + 0.1670; % manually account for tool0 to tip if we do not attach rigid tool
+    mat_R_T_M(1:2,4) = mat_R_T_M(2:-1:1,4); % Invert x and y
+    mat_R_T_M(1,4) = -mat_R_T_M(1,4); % Change y to negative
+    %mat_R_T_M(3,4) = mat_R_T_M(3,4) + 0.1670; % manually account for tool0 to tip if we do not attach rigid tool
 end
