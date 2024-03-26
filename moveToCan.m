@@ -6,12 +6,12 @@
 
 %% Inputs
 
-masterhostIP = 'add your own machine IP'
+masterhostIP = 'add your own machine IP';
 
 
 %% Preliminaries
 
-rosshurtdown;
+rosshutdown;
 rosinit(masterhostIP)
 % quick comment here: when you run this code, you will need to put in your
 % own port, IP, and vm IP that is running your gazebo.
