@@ -6,7 +6,7 @@ function [res,state] = doGrip(type)
 % Output: actoin result and state
 %--------------------------------------------------------------------------
 
-    % Create a gripper action client
+    %% Create a gripper action client
     grip_action_client = rosactionclient('/gripper_controller/follow_joint_trajectory', ...
                                           'control_msgs/FollowJointTrajectory',...
                                           'DataFormat','struct');
@@ -14,7 +14,7 @@ function [res,state] = doGrip(type)
     % Create a gripper goal action message
     grip_msg = rosmessage(grip_action_client);
 
-    % Set Grip Pos by default to pick / close gripper
+    %% Set Grip Pos by default to pick / close gripper
     gripPos = 0.225; 
 
     % Modify it if place (i.e. open)
@@ -22,10 +22,10 @@ function [res,state] = doGrip(type)
         gripPos = 0;           
     end
 
-    % Pack gripper information intro ROS message
+    %% Pack gripper information intro ROS message
     grip_goal = packGripGoal_struct(gripPos,grip_msg);
 
-    % Send action goal
+    %% Send action goal
     disp('Sending grip goal...');
 
     if waitForServer(grip_action_client)
