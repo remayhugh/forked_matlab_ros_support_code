@@ -1,4 +1,4 @@
-function [ret,state,status] = goHome(config)
+function [ret,q,state,status] = goHome(config)
     %----------------------------------------------------------------------
     % This functions uses the FollowJointTrajectory service to send desired
     % joint angles that move the robot arm to a home or ready
@@ -7,8 +7,9 @@ function [ret,state,status] = goHome(config)
     % The angles are hard-coded. 
     % 
     % Expansion:
-    % Possible to expand to different desirable configurations and have an
+    % - Possible to expand to different desirable configurations and have an
     % input string make the selection. 
+    % - Check if robot already at desired position. Then skip action calls.
     %
     % Inputs:
     % config (string): 'qr', 'qz' or other. 
@@ -27,8 +28,8 @@ function [ret,state,status] = goHome(config)
 
     % Move arm according to config
     if nargin == 0
-        ret = moveToQ('qr');
+        [ret,q] = moveToQ('qr');
     else
-        ret = moveToQ(config);
+        [ret,q] = moveToQ(config);
     end
 end

@@ -38,20 +38,27 @@ function [mat_joint_traj,robot_joint_names] = convertPoseTraj2JointTraj(robot,ma
     % Set solver weights
     ikWeights = [0.25 0.25 0.25 0.1 0.1 .1];
     
-    % Set initial guess to current position
-    joint_state_sub = rossubscriber("/joint_states", 'DataFormat','struct');
-    ros_cur_jnt_state_msg = receive(joint_state_sub,1);
-   
-    % Reorder from ROS format to Matlab format, need names.
-    [mat_cur_q,robot_joint_names] = ros2matlabJoints(ros_cur_jnt_state_msg);
+    % Get current joint states to then set the initial guess of the IK solver
+    [mat_cur_q,robot_joint_names] = get_current_joint_states;
+
+    % Check Joint Angle Integrity
     if max( abs(mat_cur_q) ) > 2*pi 
-        disp('Subscribed joints > pi. Not possible. Consider restarting gazebo...')
+        error('Subscribed joints > 2*pi. Not possible. Consider restarting gazebo...')
     end
+    
+    % Elbow Down a problem? Force elbow and w4 guesses:
+    % mat_cur_q(3) = pi/2; mat_cur_q(4) = -pi/2;
 
     % 5. Go through trajectory loop
     % Check for time complexity. Can we improve efficiency.
     for i = 1:num_traj_points
         [des_q, ~] = ik('tool0',mat_traj(:,:,i),ikWeights,mat_cur_q); % Should we update initial guess with the latest q_traj value?
+        
+        % Check Joint Angle Integrity
+        if max( abs(des_q) ) > 2*pi 
+            disp('IK joints > 2*pi. Not possible. Consider restarting gazebo...')
+        end
+
 
         % Print soln for debugging purposes:
         fprintf('IKs: '); fprintf('%.2f,', des_q);fprintf('\n')
@@ -60,8 +67,7 @@ function [mat_joint_traj,robot_joint_names] = convertPoseTraj2JointTraj(robot,ma
         mat_joint_traj(i,:) = des_q(1,:);         %q_sz = size(des_q);
 
         % 7. Update joint angles for next round: mat_cur_q
-        ros_cur_jnt_state_msg = receive(joint_state_sub,1);
-        [mat_cur_q,~] = ros2matlabJoints(ros_cur_jnt_state_msg);
+        [mat_cur_q,~] = get_current_joint_states;
     end
 % Debug disp(mat_joint_traj)
 end

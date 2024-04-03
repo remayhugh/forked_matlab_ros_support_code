@@ -1,18 +1,28 @@
-function matlab_pose = ros2matlabPose(p)
+function matlab_pose = ros2matlabPose(p,frameAdjustment,toolAdjustmentFlag)
     %----------------------------------------------------------------------
     % ros2matlabPose
-    % Converts ros pose to matlab pose according to type. Handles:
+    % Converts ros pose to matlab pose according to type. Handles two Pose
+    % types:
+    %   gazebo_msgs/GetModelStateResponse:
+    %       - Position.XYZ 
+    %       - Orientation.XYZW
+    %   geometry_msgs/TransformStamped
+    %       - Transform.Translation.XYZ
+    %       - Transform.Rotation.XYZW
+    % 
+    % Also has two adjustments:
+    % - frameAdjustment makes up for the difference between ROS/Gazebo
+    % standard frames and the frames used by matlab here where x=y, y=x,
+    % and z=-z.
     %
-    % gazebo_msgs/GetModelStateResponse:
-    % - Position.XYZ 
-    % - Orientation.XYZW
-    % geometry_msgs/TransformStamped
-    % - Transform.Translation.XYZ
-    % - Transform.Rotation.XYZW
+    % - toolAdjustmentFlag:
+    % flag to indicates we have fingers but have not adjusted IKs for it.
     % 
     % Inputs:
-    % p (ROS): pose
-    %
+    % - p (ros structure): pose 
+    % - frameAdjustment (double): adjustments: x=y, y=x, z=-z.
+    % - toolAdjustmentFlag (double): tool distance 0.165. Adjusted at end
+    % of program.
     % Outputs: 
     % matlab_pose (Transform): 4x4 matrix
     %
@@ -21,27 +31,73 @@ function matlab_pose = ros2matlabPose(p)
     % transform by composing orientation and translation.
     %----------------------------------------------------------------------
     
-    % geometry_msgs/Pose
-    if strcmp(p.MessageType, 'gazebo_msgs/GetModelStateResponse')
-        pos = [p.Pose.Position.X, ...
-               p.Pose.Position.Y, ...
-               p.Pose.Position.Z];
+    %% Local Variables
+    endEffectorAdjustment = 0;
 
-        q = UnitQuaternion(p.Pose.Orientation.W, ...
-                           [p.Pose.Orientation.X, ...
-                            p.Pose.Orientation.Y, ...
-                            p.Pose.Orientation.Z]);
-            
-    % 'geometry_msgs/TransformStamped'
-    elseif strcmp(p.MessageType, 'geometry_msgs/TransformStamped')
-        pos = [p.Transform.Translation.X, ...
-               p.Transform.Translation.Y, ...
-               p.Transform.Translation.Z];
+    % Flags
+    if nargin == 1
+        frameAdjustment    = 0;
+        toolAdjustmentFlag = 0;
 
-        q = UnitQuaternion(p.Transform.Rotation.W, ...
-                           [p.Transform.Rotation.X, ...
-                            p.Transform.Rotation.Y, ...
-                            p.Transform.Rotation.Z]);
+    else if nargin == 2
+        toolAdjustmentFlag = 0;
+    end
+
+    % If there is indeed a toold adjustment flag then change the endEffector
+    if toolAdjustmentFlag
+        endEffectorAdjustment = 0.165;
+    end
+
+    % Normal. No frame adjustment needed
+    if ~frameAdjustment 
+
+        % gazebo_msgs/GetModelStateResponse
+        if strcmp(p.MessageType, 'gazebo_msgs/GetModelStateResponse')
+            pos = [p.Pose.Position.X, ...
+                   p.Pose.Position.Y, ...
+                   (p.Pose.Position.Z - endEffectorAdjustment)];
+    
+            q = UnitQuaternion(p.Pose.Orientation.W, ...
+                               [p.Pose.Orientation.X, ...
+                                p.Pose.Orientation.Y, ...
+                                p.Pose.Orientation.Z]);
+                
+        % 'geometry_msgs/TransformStamped'
+        elseif strcmp(p.MessageType, 'geometry_msgs/TransformStamped')
+            pos = [p.Transform.Translation.X, ...
+                   p.Transform.Translation.Y, ...
+                   (p.Transform.Translation.Z - endEffectorAdjustment)];
+    
+            q = UnitQuaternion(p.Transform.Rotation.W, ...
+                               [p.Transform.Rotation.X, ...
+                                p.Transform.Rotation.Y, ...
+                                p.Transform.Rotation.Z]);
+        end
+
+    % ros_x=>mat_y, ros_y=>-mat_x, z=z. Adjust
+    else
+        % 
+        if strcmp(p.MessageType, 'gazebo_msgs/GetModelStateResponse')
+            pos = [-p.Pose.Position.Y, ...
+                    p.Pose.Position.X, ...
+                   (p.Pose.Position.Z + endEffectorAdjustment)];
+    
+            q = UnitQuaternion(p.Pose.Orientation.W, ...
+                               [-p.Pose.Orientation.Y, ...
+                                 p.Pose.Orientation.X, ...
+                                (p.Pose.Orientation.Z + endEffectorAdjustment)]);
+                
+        % 'geometry_msgs/TransformStamped'
+        elseif strcmp(p.MessageType, 'geometry_msgs/TransformStamped')
+            pos = [-p.Transform.Translation.Y, ...
+                    p.Transform.Translation.X, ...
+                    p.Transform.Translation.Z];
+    
+            q = UnitQuaternion(p.Transform.Rotation.W, ...
+                               [-p.Transform.Rotation.Y, ...
+                                p.Transform.Rotation.X, ...
+                               (p.Transform.Rotation.Z + endEffectorAdjustment)] );
+        end
     end
 
     % Build matlab pose

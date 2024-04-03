@@ -1,5 +1,5 @@
 function [res,state] = doGrip(type)
-%-----
+%--------------------------------------------------------------------------
 % Tell gripper to either pick or place via the ros gripper action client
 %
 % Input: type (string) - 'pick' or 'place'
@@ -14,8 +14,15 @@ function [res,state] = doGrip(type)
     % Create a gripper goal action message
     grip_msg = rosmessage(grip_action_client);
 
+    %% Testing if setting FeedbackFcn to 0 minimizes the loss connection
+    grip_action_client.FeedbackFcn = []; 
+
     %% Set Grip Pos by default to pick / close gripper
-    gripPos = 0.225; 
+    gripPos = 0.23; % 0.225 for upright cans tends to slip. 
+
+    if nargin==0
+        type = 'pick';
+    end
 
     % Modify it if place (i.e. open)
     if strcmp(type,'place')

@@ -15,12 +15,19 @@ function grip_result = pick(strategy,mat_R_T_M, mat_R_T_G)
     %----------------------------------------------------------------------
     
     %% 1. Vars / Dictionary of options
-    ops = dictionary();                % Type of global dictionary with all options to facilitate passing of options
-    ops("debug")               = 0;     % If set to true visualize traj before running  
-    ops("toolFlag")            = 0;     % Include rigidly attached robotiq fingers
-    ops("traj_steps")          = 1;     % Num of traj steps
-    ops("z_offset")            = 0.1;   % Vertical offset for top-down approach
-    ops("traj_duration")       = 2;     % Traj duration (secs)   
+    optns = dictionary();                 % Type of global dictionary with all options to facilitate passing of options
+    optns("debug")               = 0;     % If set to true visualize traj before running  
+    optns("toolFlag")            = 0;     % Include rigidly attached robotiq fingers
+    optns("traj_steps")          = 1;     % Num of traj steps
+    optns("z_offset")            = 0.09;  % Vertical offset for top-down approach
+    optns("traj_duration")       = 2;     % Traj duration (secs)   
+    
+    optns("frameAdjustmentFlag") = 1;
+    optns("toolAdjustmentFlag")  = 1;
+    optns("toolAdjustment")      = 0.165; % Distance from tool0 to gripper_tip_link
+
+    % optns("qz")                  = {[0 0 0 0 0 0]};        % qz angles
+    % optns("qr")                  = {[0 0 pi/2 -pi/2 0 0]}; % qr angles
 
     grip_result                = -1;           % Init to failure number  
     
@@ -28,18 +35,18 @@ function grip_result = pick(strategy,mat_R_T_M, mat_R_T_G)
     if strcmp(strategy,'topdown')
         
         % Hover over
-        over_R_T_M = lift(mat_R_T_M, ops("z_offset") );
-        traj_result = moveTo(over_R_T_M,ops);
+        over_R_T_M = lift(mat_R_T_M, optns("z_offset") );
+        traj_result = moveTo(over_R_T_M,optns);
         
         % Descend
         if ~traj_result
-            traj_result = moveTo(mat_R_T_M,ops);
+            traj_result = moveTo(mat_R_T_M,optns);
         else
-            error('ErrorID', int2str(traj_result));            
+            error('Trajectory failed with result %d', int2str(traj_result));            
         end
 
     elseif strcmpi(strategy,'direct')
-        traj_result = moveTo(mat_R_T_M,ops);
+        traj_result = moveTo(mat_R_T_M,optns);
     end
 
 
@@ -48,6 +55,6 @@ function grip_result = pick(strategy,mat_R_T_M, mat_R_T_G)
         [grip_result,grip_state] = doGrip('pick'); 
         grip_result = grip_result.ErrorCode;
     else
-        error('ErrorID', int2str(grip_result));
+        error('Grip command failed with result %d', int2str(grip_result));
     end
 end

@@ -11,7 +11,7 @@ function mat_R_T_M = set_manual_goal(goal)
 %--------------------------------------------------------------------------
 
     % Set translation and orientation
-    gripperTranslation = [goal(2) goal(1) goal(3)];
+    gripperTranslation = [goal(1) goal(2) goal(3)];
     gripperRotation    = [goal(4) goal(5) goal(6)]; %  [Z Y Z] radians
     
     % Compute the homogeneous transformation via an euler (ZYZ) representation

@@ -1,7 +1,10 @@
-function res = moveToQ(config)
+function [res,q] = moveToQ(config)
 % moveToQ 
 % Move to joint configuration prescribed by config
 % 
+% Expansion/TODO: 
+% - Check if robot already at desired position. Then skip action calls.
+%
 % Inputs
 % config (string):    qr, qz... can expand in future
 %
@@ -18,6 +21,9 @@ function res = moveToQ(config)
     
     % Create action goal message from client
     traj_goal = rosmessage(pick_traj_act_client); 
+
+    %% Testing if setting FeedbackFcn to 0 minimizes the loss connection
+    pick_traj_act_client.FeedbackFcn = [];      
     
     % Set to qr
     if nargin == 0 || strcmp(config,'qr')

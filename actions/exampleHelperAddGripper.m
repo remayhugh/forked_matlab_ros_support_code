@@ -14,11 +14,11 @@ function outputRobot = exampleHelperAddGripper(inputRobot)
 %--------------------------------------------------------------------------
 
 % Add I/O Coupling
-coupling = rigidBody('IO_Coupling','MaxNumCollisions',1);
+coupling = rigidBody('robotic_coupler','MaxNumCollisions',1);
 tf = eul2tform([0 0 0]);
-tf(:,4) = [0; 0; 0.008; 1]; % To avoid collision
+tf(:,4) = [0; 0; 0.004; 1]; % To avoid collision
 addCollision(coupling,'cylinder',[0.083/2 0.0139],tf);
-couplingJoint = rigidBodyJoint('couplingJoint','fixed');
+couplingJoint = rigidBodyJoint('robotic_coupler_joint','fixed');
 coupling.Joint = couplingJoint;
 curEndEffectorBodyName = inputRobot.BodyNames{10};
 addBody(inputRobot,coupling,curEndEffectorBodyName);
@@ -38,26 +38,16 @@ addBody(inputRobot,gripper,curEndEffectorBodyName);
 
 % Add Extention tube
 transformTube = eul2tform([0 0 0]);
-transformTube(:,4) = [0; 0; 0.101; 1]; % The width is 101
+transformTube(:,4) = [0; 0; 0.165; 1]; 
 tube = rigidBody('Tube','MaxNumCollisions',1);
 tf = eul2tform([0 0 0]);
 tf(:,4) = [0; 0; 0.101; 1]; % Gripper Width
 addCollision(tube,'cylinder',[0.005 0.2],tf);
-tubeJoint = rigidBodyJoint('tubeJoint','fixed');
+tubeJoint = rigidBodyJoint('gripper_tip_link','fixed');
 tube.Joint = tubeJoint;
 setFixedTransform(tube.Joint, transformTube);
 curEndEffectorBodyName = inputRobot.BodyNames{12};
 addBody(inputRobot,tube,curEndEffectorBodyName);
-
-% Add Bellow Small
-transformBellow = eul2tform([0 0 0]);
-transformBellow(:,4) = [0; 0; 0.21; 1]; % The width is 101
-bellow = rigidBody('Bellow');
-bellowJoint = rigidBodyJoint('bellowJoint','fixed');
-bellow.Joint = bellowJoint;
-setFixedTransform(bellow.Joint, transformBellow);
-curEndEffectorBodyName = inputRobot.BodyNames{13};
-addBody(inputRobot,bellow,curEndEffectorBodyName);
 
 outputRobot = inputRobot;
 end
