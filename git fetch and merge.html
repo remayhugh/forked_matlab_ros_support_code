@@ -1,0 +1,114 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>git fetch and merge</title>
+  <link rel="stylesheet" href="https://stackedit.io/style.css" />
+</head>
+
+<body class="stackedit">
+  <div class="stackedit__left">
+    <div class="stackedit__toc">
+      
+<ul>
+<li>
+<ul>
+<li><a href="#tutorial-git-fetch-and-cherry-pick">Tutorial: GIT Fetch and cherry-pick</a></li>
+</ul>
+</li>
+</ul>
+
+    </div>
+  </div>
+  <div class="stackedit__right">
+    <div class="stackedit__html">
+      <h2 id="tutorial-git-fetch-and-cherry-pick">Tutorial: GIT Fetch and cherry-pick</h2>
+<p>To fetch code from an upstream repository named ‘origin’ and access it without changing your own code in a repository named ‘yours’, follow these refined steps focusing on the ‘origin’ as the source of the fetch operation:</p>
+<h3 id="step-2-fetch-from-the-origin-repository">Step 2: Fetch from the ‘origin’ Repository</h3>
+<p>Assuming ‘origin’ is already configured as a remote repository in your Git setup (which is the default name for the remote repository from which you cloned), you can fetch updates from it with the following command:</p>
+<pre class=" language-sh"><code class="prism  language-sh">
+git fetch origin
+
+</code></pre>
+<p>This command downloads updates from ‘origin’ (such as new branches and data) to your local repository, but it does not merge them into your current branch. It’s a safe way to download the updates without incorporating them into your own code immediately.</p>
+<h3 id="step-3-review-the-fetched-changes">Step 3: Review the Fetched Changes</h3>
+<p>After fetching the changes, you have several options to review the fetched content without merging it into your codebase. Assuming you want to compare and potentially integrate these changes into your repository named ‘yours’, follow these steps:</p>
+<ul>
+<li><strong>List the branches fetched</strong>: To see all branches, including those fetched from ‘origin’, use:</li>
+</ul>
+<pre class=" language-sh"><code class="prism  language-sh">
+git branch -a
+
+</code></pre>
+<p>This shows local branches as well as remote-tracking branches (under ‘remotes/origin/’).</p>
+<ul>
+<li><strong>Compare changes</strong>: To compare changes between your current branch in ‘yours’ and a fetched branch from ‘origin’, use the <code>git diff</code> command. For example, to compare your current branch to the main branch fetched from ‘origin’, you would use:</li>
+</ul>
+<pre class=" language-sh"><code class="prism  language-sh">
+git diff YOUR_CURRENT_BRANCH origin/main
+
+</code></pre>
+<p>Replace <code>YOUR_CURRENT_BRANCH</code> with the branch you’re currently on in the ‘yours’ repository.</p>
+<ul>
+<li><strong>Checkout a specific branch from ‘origin’</strong>: If you wish to inspect a specific branch from ‘origin’ more closely, you can check out a new branch in your local repository based on that remote branch without merging it into your branches. For instance:</li>
+</ul>
+<pre class=" language-sh"><code class="prism  language-sh">
+git checkout -b branch-to-review origin/branch-to-review
+
+</code></pre>
+<p>This command creates a new local branch (<code>branch-to-review</code>) that tracks the specified branch from ‘origin’. It allows you to test the changes in isolation from your own development work.</p>
+<p>By following these steps for repositories named ‘origin’ and ‘yours’, you can safely fetch and inspect changes from ‘origin’ without directly affecting the codebase in ‘yours’. This approach is fundamental for reviewing updates and ensuring compatibility before integrating new code into your own repository.</p>
+<p>If you want to merge specific commit changes follow the next steps:</p>
+<p>Merging only specific commits from one branch into another in Git can be achieved using the <code>git cherry-pick</code> command. This process allows you to select individual commits and apply them to your current branch. It’s a powerful tool for maintaining a clean and precise commit history, especially when you only need certain changes from a branch without merging all commits. Here’s how to do it in detail:</p>
+<h3 id="step-1-identify-the-commit-hashes">Step 1: Identify the Commit Hashes</h3>
+<p>First, you need to identify the commit hashes (IDs) of the specific commits you want to merge into your current branch. You can view the commit history with <code>git log</code>, or if you know the branch name where the commits are located, you can use:</p>
+<pre class=" language-sh"><code class="prism  language-sh">
+git log branch-name
+
+</code></pre>
+<p>This will list the commits in that branch, showing their hashes, authors, dates, and messages. Each commit hash is a unique identifier for that specific commit.</p>
+<h3 id="step-2-checkout-the-target-branch">Step 2: Checkout the Target Branch</h3>
+<p>Ensure you’re on the branch where you want to apply the commits. If you’re not already on this branch, you can switch to it using:</p>
+<pre class=" language-sh"><code class="prism  language-sh">
+git checkout target-branch-name
+
+</code></pre>
+<p>Replace <code>target-branch-name</code> with the name of the branch you’re merging the commits into.</p>
+<h3 id="step-3-cherry-pick-specific-commits">Step 3: Cherry-Pick Specific Commits</h3>
+<p>To merge a specific commit, use the <code>git cherry-pick</code> command followed by the commit hash:</p>
+<pre class=" language-sh"><code class="prism  language-sh">
+git cherry-pick commit-hash
+
+</code></pre>
+<p>If you have multiple commits to merge, you can list them all in a single command, separated by spaces:</p>
+<pre class=" language-sh"><code class="prism  language-sh">
+git cherry-pick commit-hash1 commit-hash2 commit-hash3
+
+</code></pre>
+<h3 id="step-4-resolve-conflicts-if-any">Step 4: Resolve Conflicts (If Any)</h3>
+<p>Cherry-picking commits might result in conflicts, especially if the changes in the commits conflict with the current state of your branch. Git will notify you if there are any conflicts. To resolve these, you’ll need to manually edit the files to fix the conflicts, mark them as resolved using <code>git add</code>, and then complete the cherry-pick process with:</p>
+<pre class=" language-sh"><code class="prism  language-sh">
+git cherry-pick --continue
+
+</code></pre>
+<p>If at any point you decide you want to abort the cherry-pick operation, you can use:</p>
+<pre class=" language-sh"><code class="prism  language-sh">
+git cherry-pick --abort
+
+</code></pre>
+<h3 id="step-5-push-your-changes-optional">Step 5: Push Your Changes (Optional)</h3>
+<p>Once you’ve successfully cherry-picked the commits and resolved any conflicts, you may want to push your changes to a remote repository. Ensure everything is committed, and then use:</p>
+<pre class=" language-sh"><code class="prism  language-sh">
+git push origin target-branch-name
+
+</code></pre>
+<h3 id="summary">Summary</h3>
+<p>Cherry-picking is a selective merge operation that allows you to merge specific commits from one branch into another. It’s a valuable technique for maintaining a clean commit history and ensuring that only the desired changes are incorporated into a branch. Remember to always review the changes and test your application after cherry-picking commits to ensure stability and functionality.</p>
+
+    </div>
+  </div>
+</body>
+
+</html>
