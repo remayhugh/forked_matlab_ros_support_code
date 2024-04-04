@@ -35,7 +35,7 @@ r = rosrate(10);
 if strcmp(type,'gazebo')
     for i=1:n
         % 03 Get Pose
-        model_name = models.ModelNames{23+1};
+        model_name = models.ModelNames{23+i};
         fprintf('Picking up model: %s \n',model_name);
         [mat_R_T_G, mat_R_T_M] = get_robot_object_pose_wrt_base_link(model_name);
        
